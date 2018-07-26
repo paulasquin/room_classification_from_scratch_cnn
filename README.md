@@ -26,7 +26,11 @@ In order to learn more about CNN operation, you can consult [this page](https://
 
 ## 1. Build a network
 For this code to build your own CNN model, you have to choose the hyperparameters that will define the model. 
-For this, you will have to edit the file [hyperparams.txt](hyperparams.txt). Here are the influences of each parameter change : 
+For this, you will have to edit the file [hyperparams.txt](hyperparams.txt).  
+
+![Hyperparams.txt](docs/hyperparams.png)  
+
+Here are the influences of each parameter change : 
 
 **NUM_ITERATION**: number of training iterations.  
 \+ If too tall, the model still works but in the end will not learn anymore and performs unnecessary calculations  
@@ -81,6 +85,13 @@ Under the export_XX folder, you will find those files :
 \- **train.csv** : contains datas to plot the graps that will help you appreciate the performance of your model. You will find the scheme  
 	Iteration	|	Epoch	|Training Accuracy	|	Validation Accuracy	|	Validation Loss  
 \- **model.meta**, **model.index**, **checkpoint**, **model.data-XX** that are the model files  
+ 
+As the image loading process can be quit long, the script will also create a folder named after your specifique dataset (name, resolution IMG_SIZE choosed, SHORTER_DATASET_VALUE). 
+The script will write .npy files in it in order to load faster needed arrays the next time your are using the same dataset 
+ 
+In the end, you will be able to plot graph using you prefered sheet editor. For exemple with Google Sheets :  
+
+![Model Graps](docs/model_graphs.png)
  
 ## 3. Predict the label of a new map
 Before running prediction on new files, you have to make sure that they are of the same shape than the one you used for the training.
