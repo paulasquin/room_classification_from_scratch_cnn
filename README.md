@@ -4,9 +4,9 @@ Project by [Paul Asquin](https://www.linkedin.com/in/paulasquin/) for Awabot - S
 # I.Introduction  
 This repo is a part of the Room Classification Project. 
 The aim of the Room Classification Project is to make an indoor mobile robot able to recognize a room using its 2D map. 
-The output of the project should be "Kitchen", "Bedroom", "Batroom", etc.  
+The output of the project should be "Kitchen", "Bedroom", "Bathroom", etc.  
 
-In order to achieve this goal, we have chosen to use Machine Learning techniques in order to obtain a powerfull recognition system with no hard-coded rules.  
+In order to achieve this goal, we have chosen to use Machine Learning techniques in order to obtain a powerful recognition system with no hard-coded rules.  
 
 As for every Machine Learning project, we need adapted datasets and a learning algorithm.  
 
@@ -17,11 +17,11 @@ Here is the overall architecture of the project :
 ├── room_classification_network_retrain  
 ├── Datasets (created by room_classification_get_datasets)   
 
-Before comming to this repo, you should have installed the project datasets using _room\_classification\_get\_datasets_
+Before coming to this repo, you should have installed the project datasets using _room\_classification\_get\_datasets_
 
 # II. Goals and instructions
 The goal of this repo is to build and train a Convolutional Neural Network in order to generate a model for the room classification [train.py](train.py), and use this model to make prediction on new given maps [predict.py](predict.py).
-Those scripts are inspired by the work of the [cv-tricks](http://cv-tricks.com/) webite who developed the most reachable tutorial that I found on [Image CNN training](http://cv-tricks.com/tensorflow-tutorial/training-convolutional-neural-network-for-image-classification/).
+Those scripts are inspired by the work of the [cv-tricks](http://cv-tricks.com/) website who developed the most reachable tutorial that I found on [Image CNN training](http://cv-tricks.com/tensorflow-tutorial/training-convolutional-neural-network-for-image-classification/).
 In order to learn more about CNN operation, you can consult [this page](https://medium.com/@RaghavPrabhu/understanding-of-convolutional-neural-network-cnn-deep-learning-99760835f148) from [medium.com](https://medium.com).  
 
 ## 1. Build a network
@@ -77,8 +77,8 @@ sudo python3 train.py
 
 All the dependencies should be already installed in your computer since you use them in _room\_classification\_get\_datasets_  
 
-The _train.py_ script is going to create the folder _exports_ and will write the model and usefull files under an automatic named folder : _exports/export\_XX_.
-XX is a incremental number, starting from 0. Once you trained the model export\_0, you will find the next one under export\_1 etc.  
+The _train.py_ script is going to create the folder _exports_ and will write the model and useful files under an automatic named folder : _exports/export\_XX_.
+XX is an incremental number, starting from 0. Once you trained the model export\_0, you will find the next one under export\_1 etc.  
 
 Under the export_XX folder, you will find those files :  
 \- **info.txt** : contains the info you have given to train.py to create this model (similar to hyperparams.txt)  
@@ -86,18 +86,18 @@ Under the export_XX folder, you will find those files :
 	Iteration	|	Epoch	|Training Accuracy	|	Validation Accuracy	|	Validation Loss  
 \- **model.meta**, **model.index**, **checkpoint**, **model.data-XX** that are the model files  
  
-As the image loading process can be quit long, the script will also create a folder named after your specifique dataset (name, resolution IMG_SIZE choosed, SHORTER_DATASET_VALUE). 
-The script will write .npy files in it in order to load faster needed arrays the next time your are using the same dataset 
+As the image loading process can be quite long, the script will also create a folder named after your specific dataset (name, resolution IMG_SIZE chose, SHORTER_DATASET_VALUE). 
+The script will write .npy files in it in order to load faster needed arrays the next time you are using the same dataset 
  
-In the end, you will be able to plot graph using you prefered sheet editor. For exemple with Google Sheets :  
+In the end, you will be able to plot graph using you preferred sheet editor. For example with Google Sheets :  
 
-![Model Graps](docs/model_graphs.png)
+![Model Graph](docs/model_graphs.png)
  
 ## 3. Predict the label of a new map
-Before running prediction on new files, you have to make sure that they are of the same shape than the one you used for the training.
+Before running prediction on new files, you have to make sure that they are of the same shape as the one you used for the training.
 That mean :  
 \- **Same resolution**. If you trained your image on 256px*256px, you will need to use this resolution. You can resize an image with the **IMG_SIZE** hyperparameter in _predict.py_   
-\- **Same color sheme**. For exemple all white, except black for obstacles.  
+\- **Same color scheme**. For example all white, except black for obstacles.  
 \- **Same "format"**. It's likely that your dataset is made of maps whose bounds touch the walls. Be sure to have this feature in your input file.   
 
 When this check list is OK for you, you can run
@@ -108,10 +108,12 @@ sudo python3 predict.py /path/to/your/image.jpg
 The predict.py script will scan all the models you have trained and will propose you to select one.
 Enter the number of the model you want to use and press enter.  
 
-You will obtained an ouput like :  
+You will obtain an ouput like :  
     Bathroom : 0.013430%  
     Bedroom : 99.986410%  
     Kitchen : 0.000010%  
     Living Room : 0.000150%  
 	
-Once your model fit your expectations, feel free to change the code of predit.py to make it automaticely choose the model you want.
+Once your model fit your expectations, feel free to change the code of predit.py to make it automatically choose the model you want.
+
+
