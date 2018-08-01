@@ -1,4 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
+# This project use the structure of the cv-tricks tutorial on Image Classification :
+# http://cv-tricks.com/tensorflow-tutorial/training-convolutional-neural-network-for-image-classification/
+# The scripts have been modified by Paul Asquin for a Room Classification project based on rooms 2D Maps
+# Written by Paul Asquin - paul.asquin@gmail.com - Summer 2018
+
 
 import dataset
 import train

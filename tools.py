@@ -1,5 +1,6 @@
+#!/usr/bin/python3
 # General toolbox for Room Classification Project
-# Written by Paul Asquin paul.asquin@gmail.com for Awabot Intelligence, 2018
+# Written by Paul Asquin - paul.asquin@gmail.com - Summer 2018
 
 import os
 import subprocess
