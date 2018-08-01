@@ -1,17 +1,10 @@
-#!/usr/bin/env python
-
+#!/usr/bin/python3
 # This project use the structure of the cv-tricks tutorial on Image Classification :
 # http://cv-tricks.com/tensorflow-tutorial/training-convolutional-neural-network-for-image-classification/
-# The scripts have been modified by Paul ASQUIN for a Room Classification project based on rooms 2D Maps
-
-__author__ = "Paul Asquin"
-__version__ = "1.0"
-__maintainer__ = "Paul Asquin"
-__email__ = "paul.asquin@gmail.com"
-__status__ = "Research"
+# The scripts have been modified by Paul Asquin for a Room Classification project based on rooms 2D Maps
+# Written by Paul Asquin - paul.asquin@gmail.com - Summer 2018
 
 import dataset
-import tensorflow as tf
 import math
 import random
 import numpy as np
@@ -20,6 +13,8 @@ import sys
 import gc
 import time
 from tools import *
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import tensorflow as tf
 
 # Adding Seed so that random initialization is consistent
 from numpy.random import seed
@@ -32,24 +27,24 @@ set_random_seed(2)
 gc.collect()
 
 # Hide useless tensorflow warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 HYPERPARAM_TXT_PATH = 'hyperparams.txt'
 
 # === Model parameters ===
 # HYPERPARAM
 NUM_ITERATION = 4000
-BATCH_SIZE = 512
+BATCH_SIZE = 128
 LEARNING_RATE = 1e-4
 SHORTER_DATASET_VALUE = 0
-IMG_SIZE = 500
+IMG_SIZE = 256
 LES_NUM_FILTERS_CONV = [64, 64, 64, 128, 128, 128, 256, 256, 256, 512, 512, 512]
 LES_CONV_FILTER_SIZE = [3] * len(LES_NUM_FILTERS_CONV)
 FC_LAYER_SIZE = 128
-DATASET_PATH = "../Datasets/JPG_Matterport_0.2"
+DATASET_PATH = "../Datasets/JPG"
 
 # Load hyperparams from hyperparams.txt file if exists
-if True and os.path.isfile(HYPERPARAM_TXT_PATH):
-    print("Loading from " + HYPERPARAM_TXT_PATH)
+if os.path.isfile(HYPERPARAM_TXT_PATH):
+    print("Loading hyperparameters from " + HYPERPARAM_TXT_PATH)
     with open(HYPERPARAM_TXT_PATH, 'r') as f:
         for line in f:
             if 'NUM_ITERATION' in line:
@@ -87,10 +82,6 @@ CSV_TRAIN = EXPORTNUM_DIR_PATH + "/train.csv"
 if len(LES_CONV_FILTER_SIZE) != len(LES_NUM_FILTERS_CONV):
     print("Convolutional layers params aren't the same length. Setting to 3*3")
     LES_CONV_FILTER_SIZE = [3] * len(LES_NUM_FILTERS_CONV)
-
-# === Global variables ===
-g_total_iterations = 0
-
 
 class ConvolutionLayer:
     inputt = 0
@@ -202,22 +193,15 @@ def show_progress(epoch, feed_dict_train, feed_dict_validate, val_loss, session,
 
 
 def train(num_iteration, session, data, cost, saver, accuracy, optimizer, x, y_true):
-    global g_total_iterations
     tic = time.time()
     time_left = 0
-    # for i in range(g_total_iterations, g_total_iterations + num_iteration):
     for i in range(num_iteration):
-        print("\t" + str(i) + " : [" + str(g_total_iterations) + ", " + str(
-            g_total_iterations + num_iteration) + "]. Save every " + str(int(data.train.num_examples / BATCH_SIZE)))
-
+        print("\t" + str(i) + " : " + str(num_iteration) + ". Save every " + str(int(data.train.num_examples / BATCH_SIZE)))
         x_batch, y_true_batch, _, _ = data.train.next_batch(BATCH_SIZE)
         x_valid_batch, y_valid_batch, _, _ = data.valid.next_batch(BATCH_SIZE)
-
-        feed_dict_tr = {x: x_batch,
-                        y_true: y_true_batch}
-        feed_dict_val = {x: x_valid_batch,
-                         y_true: y_valid_batch}
+        feed_dict_tr = {x: x_batch, y_true: y_true_batch}
         session.run(optimizer, feed_dict=feed_dict_tr)
+        feed_dict_val = {x: x_valid_batch, y_true: y_valid_batch}
         if i % int(data.train.num_examples / BATCH_SIZE) == 0:
             val_loss = session.run(cost, feed_dict=feed_dict_val)
             epoch = int(i / int(data.train.num_examples / BATCH_SIZE))
@@ -233,9 +217,6 @@ def train(num_iteration, session, data, cost, saver, accuracy, optimizer, x, y_t
             epoch = int(i / int(data.train.num_examples / BATCH_SIZE))
             show_progress(epoch, feed_dict_tr, feed_dict_val, val_loss, session=session, accuracy=accuracy, i=i,
                           milestone=True, time_left=time_left)
-
-    g_total_iterations += num_iteration
-
 
 def init():
     with open(INFO_TXT_PATH, 'w') as f:
@@ -254,6 +235,7 @@ def init():
 
 
 def main():
+    gc.collect()
     init()
     session = tf.Session()
     # Prepare input data
@@ -264,29 +246,25 @@ def main():
             classes.pop(i)
         else:
             i += 1
-    print(classes)
+    classes.sort()
+    print("Labels : " + str(classes))
     num_classes = len(classes)
-
     data = dataset.read_train_sets(
         DATASET_PATH,
         IMG_SIZE,
         classes,
         validation_size=VALIDATION_PERCENTAGE,
         shorter=SHORTER_DATASET_VALUE,
-        num_channels=NUM_CHANNELS,
         dataset_save_dir_path=DATASET_SAVE_DIR_PATH
     )
-
     print("\nComplete reading input data. Will Now print a snippet of it")
     print("Number of files in Training-set:\t\t{}".format(len(data.train.labels)))
     print("Number of files in Validation-set:\t{}".format(len(data.valid.labels)))
 
     x = tf.placeholder(tf.float32, shape=[None, IMG_SIZE, IMG_SIZE, NUM_CHANNELS], name='x')
-
     # labels
     y_true = tf.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
     y_true_cls = tf.argmax(y_true, axis=1)
-
     lesLayers = []
     # Adding Convolutional layers
     for i in range(len(LES_NUM_FILTERS_CONV)):
