@@ -16,6 +16,9 @@ Here is the overall architecture of the project :
 ├── room_classification_from_scratch_cnn  
 ├── room_classification_network_retrain  
 ├── Datasets (created by room_classification_get_datasets)   
+  
+![Room Classification Project Architecture](docs/project_architecture.png)  
+_Room Classification Project Architecture_  
 
 Before coming to this repo, you should have installed the project datasets using _room\_classification\_get\_datasets_
 
