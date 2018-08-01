@@ -92,7 +92,7 @@ Under the export_XX folder, you will find those files :
 As the image loading process can be quite long, the script will also create a folder named after your specific dataset (name, resolution IMG_SIZE chose, SHORTER_DATASET_VALUE). 
 The script will write .npy files in it in order to load faster needed arrays the next time you are using the same dataset 
  
-In the end, you will be able to plot graph using you preferred sheet editor. For example with Google Sheets :  
+In the end, you will be able to plot graph using your preferred sheet editor. For example with Google Sheets :  
 
 ![Model Graph](docs/model_graphs.png)
  
@@ -117,6 +117,6 @@ You will obtain an ouput like :
     Kitchen : 0.000010%  
     Living Room : 0.000150%  
 	
-Once your model fit your expectations, feel free to change the code of predit.py to make it automatically choose the model you want.
+Once your model fit your expectations, feel free to change the code of [predict.py](predict.py) to make it automatically choose the model you want.
 
 
