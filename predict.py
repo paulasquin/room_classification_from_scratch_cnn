@@ -28,7 +28,7 @@ def main():
     image_size = IMG_SIZE
     num_channels = NUM_CHANNELS
     images = []
-    image = dataset.read_image(filename=image_path, image_size=image_size, num_channels=num_channels)
+    image = dataset.read_image(filename=image_path, image_size=image_size)
     images.append(image)
     images = np.array(images, dtype=np.uint8)
     # The input to the network is of shape [None image_size image_size num_channels]. Hence we reshape.
