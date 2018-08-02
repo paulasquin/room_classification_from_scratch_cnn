@@ -12,6 +12,7 @@ import os
 import sys
 import gc
 import time
+import shutil
 from tools import *
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
@@ -196,7 +197,7 @@ def train(num_iteration, session, data, cost, saver, accuracy, optimizer, x, y_t
     tic = time.time()
     time_left = 0
     for i in range(num_iteration):
-        print("\t" + str(i) + " : " + str(num_iteration) + ". Save every " + str(int(data.train.num_examples / BATCH_SIZE)))
+        print("\t" + str(i) + " -> " + str(num_iteration) + ". Save every " + str(int(data.train.num_examples / BATCH_SIZE)))
         x_batch, y_true_batch, _, _ = data.train.next_batch(BATCH_SIZE)
         x_valid_batch, y_valid_batch, _, _ = data.valid.next_batch(BATCH_SIZE)
         feed_dict_tr = {x: x_batch, y_true: y_true_batch}
@@ -233,8 +234,18 @@ def init():
     with open(CSV_TRAIN, 'w') as f:
         f.write("Iteration\tEpoch\tTraining Accuracy\tValidation Accuracy\tValidation Loss\n")
 
+def cleanExports():
+    """ Remove folder with no model written """
+    les_folders = os.listdir(EXPORTS_DIR_PATH)
+    for folder in les_folders:
+        if "export" in folder and not os.path.isfile(EXPORTS_DIR_PATH + "/" + folder + "/model.meta"):
+            print("Removing " + EXPORTS_DIR_PATH + "/" + folder)
+            shutil.rmtree(EXPORTS_DIR_PATH + "/" + folder)    
+
 
 def main():
+    cleanExports()
+    return 0
     gc.collect()
     init()
     session = tf.Session()
