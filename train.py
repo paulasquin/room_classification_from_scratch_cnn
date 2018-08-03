@@ -16,7 +16,7 @@ import shutil
 from tools import *
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
-
+tf.logging.set_verbosity(tf.logging.ERROR)
 # Adding Seed so that random initialization is consistent
 from numpy.random import seed
 
@@ -173,36 +173,39 @@ def create_fc_layer(input, num_inputs, num_outputs, use_relu=True):
 def show_progress(epoch, feed_dict_train, feed_dict_validate, val_loss, session, accuracy, i, milestone=False, time_left=0):
     acc = session.run(accuracy, feed_dict=feed_dict_train)
     val_acc = session.run(accuracy, feed_dict=feed_dict_validate)
-    msg = "Training Epoch {0} --- Training Accuracy: {1:>6.1%}, Validation Accuracy: {2:>6.1%},  Validation Loss: {3:.3f}"
-    prefix = ""
+    msg = "\tTraining Epoch {0}\n\t\tTraining Accuracy\t{1:>6.1%}\n\t\tValidation Accuracy\t{2:>6.1%}\n\t\tValidation Loss\t\t{3:.3f}"
     suffix = ""
+    time_left_msg = ""
     if milestone:
-        prefix = "\t"
         if time_left != 0:
             h = int(time_left / 3600)
             min = int((time_left - h * 3600) / 60)
-
-            suffix = ",  Time Left : " + str(h) + "h" + str(min) + "m"
+            time_left_msg = "\n\t\tTime Left\t\t~ " + str(h) + "h" + str(min) + "m"
     else:
-        prefix = "Saving model. "
+        print("\tSaving the model." + " "*20)
 
     with open(CSV_TRAIN, 'a') as f:
         txt = str(i) + "\t" + str(epoch + 1) + "\t" + str(acc) + "\t" + str(val_acc) + "\t" + str(val_loss) + "\n"
         f.write(txt.replace('.', ','))
 
-    print(prefix + msg.format(epoch + 1, acc, val_acc, val_loss) + suffix)
+    print(msg.format(epoch + 1, acc, val_acc, val_loss) + time_left_msg)
 
 
 def train(num_iteration, session, data, cost, saver, accuracy, optimizer, x, y_true):
+    print("Start the training. Saving every " + str(int(data.train.num_examples / BATCH_SIZE)) + " iterations.")
     tic = time.time()
     time_left = 0
     for i in range(num_iteration):
-        print("\t" + str(i) + " -> " + str(num_iteration) + ". Save every " + str(int(data.train.num_examples / BATCH_SIZE)))
+        print(str(i+1) + "/" + str(num_iteration) + " - Loading the batch" + " "*20, end="\r")
         x_batch, y_true_batch, _, _ = data.train.next_batch(BATCH_SIZE)
         x_valid_batch, y_valid_batch, _, _ = data.valid.next_batch(BATCH_SIZE)
         feed_dict_tr = {x: x_batch, y_true: y_true_batch}
+
+        print(str(i+1) + "/" + str(num_iteration) + " - Running the optimization" + " "*20, end="\r")
         session.run(optimizer, feed_dict=feed_dict_tr)
         feed_dict_val = {x: x_valid_batch, y_true: y_valid_batch}
+        print(str(i+1) + "/" + str(num_iteration) + " - Completed" + " "*20)
+
         if i % int(data.train.num_examples / BATCH_SIZE) == 0:
             val_loss = session.run(cost, feed_dict=feed_dict_val)
             epoch = int(i / int(data.train.num_examples / BATCH_SIZE))
@@ -216,8 +219,18 @@ def train(num_iteration, session, data, cost, saver, accuracy, optimizer, x, y_t
             tic = time.time()
             val_loss = session.run(cost, feed_dict=feed_dict_val)
             epoch = int(i / int(data.train.num_examples / BATCH_SIZE))
-            show_progress(epoch, feed_dict_tr, feed_dict_val, val_loss, session=session, accuracy=accuracy, i=i,
-                          milestone=True, time_left=time_left)
+            show_progress(
+                epoch, 
+                feed_dict_tr, 
+                feed_dict_val, 
+                val_loss, 
+                session=session, 
+                accuracy=accuracy, 
+                i=i,
+                milestone=True, 
+                time_left=time_left
+            )
+
 
 def init():
     with open(INFO_TXT_PATH, 'w') as f:
@@ -234,6 +247,7 @@ def init():
     with open(CSV_TRAIN, 'w') as f:
         f.write("Iteration\tEpoch\tTraining Accuracy\tValidation Accuracy\tValidation Loss\n")
 
+
 def cleanExports():
     """ Remove folder with no model written """
     les_folders = os.listdir(EXPORTS_DIR_PATH)
@@ -244,8 +258,6 @@ def cleanExports():
 
 
 def main():
-    cleanExports()
-    return 0
     gc.collect()
     init()
     session = tf.Session()
@@ -268,12 +280,13 @@ def main():
         shorter=SHORTER_DATASET_VALUE,
         dataset_save_dir_path=DATASET_SAVE_DIR_PATH
     )
-    print("\nComplete reading input data. Will Now print a snippet of it")
-    print("Number of files in Training-set:\t\t{}".format(len(data.train.labels)))
-    print("Number of files in Validation-set:\t{}".format(len(data.valid.labels)))
+    print("Complete reading input data.")
+    print("Number of files in Training-set : " + str(len(data.train.labels)))
+    print("Number of files in Validation-set : " + str(len(data.valid.labels)))
 
+    print("\nBuilding the model", end="")
+    sys.stdout.flush()
     x = tf.placeholder(tf.float32, shape=[None, IMG_SIZE, IMG_SIZE, NUM_CHANNELS], name='x')
-    # labels
     y_true = tf.placeholder(tf.float32, shape=[None, num_classes], name='y_true')
     y_true_cls = tf.argmax(y_true, axis=1)
     lesLayers = []
@@ -287,10 +300,8 @@ def main():
             num_input_channels = lesLayers[-1].num_filters
 
         lesLayers.append(ConvolutionLayer(inputt, num_input_channels, LES_CONV_FILTER_SIZE[i], LES_NUM_FILTERS_CONV[i]))
-
     # Adding flatten layer
     lesLayers.append(create_flatten_layer(lesLayers[-1].layer))
-
     # Adding fully connected layers
     lesLayers.append(
         create_fc_layer(
@@ -300,7 +311,6 @@ def main():
             use_relu=True
         )
     )
-
     lesLayers.append(
         create_fc_layer(
             input=lesLayers[-1],
@@ -309,20 +319,28 @@ def main():
             use_relu=False
         )
     )
-
     y_pred = tf.nn.softmax(lesLayers[-1], name='y_pred')
     y_pred_cls = tf.argmax(y_pred, axis=1)
-
     session.run(tf.global_variables_initializer())
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=lesLayers[-1],
-                                                            labels=y_true)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
+        logits=lesLayers[-1],
+        labels=y_true
+    )
     cost = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost)
     correct_prediction = tf.equal(y_pred_cls, y_true_cls)
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-
     session.run(tf.global_variables_initializer())
     saver = tf.train.Saver()
+    print(" - Done")
+
+    print("Saving the labels", end="")
+    sys.stdout.flush()
+    with open(EXPORTNUM_DIR_PATH + "/labels.txt", "w") as f:
+        for classe in classes:
+            f.write(classe + "\n")
+    print(" - Done")
+
     try:
         train(
             num_iteration=NUM_ITERATION,
@@ -336,12 +354,14 @@ def main():
             y_true=y_true
         )
     except KeyboardInterrupt:
-        print("Exiting the training")
+        print("Exiting the training due to KeyboardInterrupt")
         pass
-
+    print("Clean exiting", end="")
+    sys.stdout.flush()
     session.close()
-    gc.collect()  # Free not allocated memory
-
+    gc.collect()
+    print(" - Done\n\n")
+    return 0
 
 if __name__ == '__main__':
     main()
