@@ -70,6 +70,8 @@ class DataSet(object):
 def read_image(filename, image_size):
     """ Open a file, read the image and convert it to an optimum shape"""
     image = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+    if image_size != len(image):
+        image = cv2.resize(image, (image_size, image_size), 0, 0, cv2.INTER_LINEAR)
     image = np.where(image > 30, 1, 0)  # Improve the contrast of the dataset and transform 255 range to 0/1 values
     image = image.astype(np.bool) # Using booleans for RAM optimization
     return (image)
