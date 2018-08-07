@@ -24,11 +24,11 @@ def main():
     image_path = sys.argv[1]
     if image_path[0] != "/":
         image_path = dir_path + '/' + image_path
-    image = np.array([dataset.read_image(filename=image_path, image_size=IMAGE_SIZE)], , dtype=np.uint8)
+    image = np.array([dataset.read_image(filename=image_path, image_size=IMG_SIZE)], dtype=np.uint8)
     
     print("Shapping the image for the model input")
     # The input to the network is of shape [None image_size image_size num_channels]. Hence we reshape.
-    x_batch = image.reshape(1, image_size, image_size, NUM_CHANNELS)
+    x_batch = image.reshape(1, IMG_SIZE, IMG_SIZE, NUM_CHANNELS)
 
     print("Please choose the model to use : ")
     les_meta_path = locate_files(extension=".meta", path=os.getcwd(), dbName="meta")
@@ -70,14 +70,15 @@ def main():
     try:
         with open(model_dir_path + "labels.txt", 'r') as f:
             for line in f:
-                label = f.readline().replace("\n", "")
+                label = line.replace("\n", "")
                 if label != "":
                     les_labels.append(label)
     except Exception as e:
         les_labels = ['Bathroom', 'Bedroom', 'Kitchen', 'Living Room']
         print("Error openning labels.txt. We are going to use default values : " + str(les_labels))
         print("***\n" + str(e) + "\n***")
-        
+    print("Using labels : " + str(les_labels))
+    
     y_test_images = np.zeros((1, len(les_labels)))
     ### Creating the feed_dict that is required to be fed to calculate y_pred
     feed_dict_testing = {x: x_batch, y_true: y_test_images}
