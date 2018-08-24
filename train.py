@@ -258,6 +258,7 @@ def cleanExports():
 
 
 def main():
+    cleanExports()
     gc.collect()
     init()
     session = tf.Session()
